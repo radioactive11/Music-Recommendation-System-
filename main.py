@@ -1,14 +1,20 @@
 import numpy as np
 import pandas as pd
 import colorama
+import threading
+import concurrent.futures
+
 
 colorama.init()
 
 print("loading files...\n")
 
-cosine_sim = np.load("sim.npy")
+#cosine_sim = np.load("sim.npy")
 
-print("files loaded\n\n")
+def load_matrix():
+    cosine_sim = np.load("sim.npy")
+    return cosine_sim
+
 
 def get_song_id(inp_str):
     ids = pd.read_csv("id.csv")
@@ -26,7 +32,7 @@ def get_song_id(inp_str):
     return song_id
 
 
-def get_recommendations(idx, cosine_sim=cosine_sim):
+def get_recommendations(idx, cosine_sim):
     
     sim_scores = list(enumerate(cosine_sim[idx]))
 
@@ -51,10 +57,22 @@ def display_recoms(recoms, idx):
         print("\n")
 
 
-inp = 0
-while inp != -1:
-    inp_str = input("Enter song name: ")
-    song_id = get_song_id(inp_str)
-    recomms = get_recommendations(song_id)
-    display_recoms(recomms, song_id)
-    print('\n')
+
+def main():
+    # matrix = threading.Thread(target=load_matrix).start()
+    # inp_str = input("Enter song name: ")
+    # song_id = get_song_id(inp_str)
+    # recomms = get_recommendations(song_id, matrix)
+    # display_recoms(recomms, song_id)
+    # print('\n')
+
+    with concurrent.futures.ThreadPoolExecutor() as exec:
+        loader = exec.submit(load_matrix)
+        matrix = loader.result()
+        inp_str = input("Enter song name: ")
+        song_id = get_song_id(inp_str)
+        recomms = get_recommendations(song_id, matrix)
+        display_recoms(recomms, song_id)
+
+
+main()
