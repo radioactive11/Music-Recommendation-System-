@@ -58,6 +58,12 @@ def display_recoms(recoms, idx):
 
 
 
+def temp():
+    print("Enter song name: ")
+    inp_str = input()
+    song_id = get_song_id(inp_str)
+    return song_id
+
 def main():
     # matrix = threading.Thread(target=load_matrix).start()
     # inp_str = input("Enter song name: ")
@@ -68,9 +74,9 @@ def main():
 
     with concurrent.futures.ThreadPoolExecutor() as exec:
         loader = exec.submit(load_matrix)
+        take_inp = exec.submit(temp)
         matrix = loader.result()
-        inp_str = input("Enter song name: ")
-        song_id = get_song_id(inp_str)
+        song_id = take_inp.result()
         recomms = get_recommendations(song_id, matrix)
         display_recoms(recomms, song_id)
 
